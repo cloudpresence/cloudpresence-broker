@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "cloudpresence-broker.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "cloudpresence-broker.name" . }}
+    helm.sh/chart: {{ include "cloudpresence-broker.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    cp: broker
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "cloudpresence-broker.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      cp: broker
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "cloudpresence-broker.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        cp: broker
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["broker"]
+          args: [
+            {{ range .Values.arguments }}
+              {{ . }}
+            {{ end }}
+          ]
+          ports:
+            - containerPort: 8000
+              protocol: TCP
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+
