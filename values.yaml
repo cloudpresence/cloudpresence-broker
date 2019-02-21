@@ -21,7 +21,7 @@ arguments: [
 ]
 
 nameOverride: ""
-fullnameOverride: ""
+fullnameOverride: "cloudpresence-broker"
 
 service:
   name: broker
